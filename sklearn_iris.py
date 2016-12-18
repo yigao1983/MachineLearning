@@ -2,6 +2,7 @@ import sklearn.datasets as datasets
 import sklearn.model_selection as ms
 import sklearn.preprocessing as pp
 import sklearn.linear_model as lm
+import sklearn.svm as svm
 import sklearn.metrics as metrics
 import numpy as np
 import matplotlib.colors as clrs
@@ -50,11 +51,14 @@ def main():
     X_train_std = sc.transform(X_train)
     X_test_std = sc.transform(X_test)
     
-    ppn = lm.Perceptron(n_iter=40, eta0=0.01, random_state=0).fit(X_train_std, y_train)
-    y_pred = ppn.predict(X_test_std)
+    #ppn = lm.Perceptron(n_iter=40, eta0=0.01, random_state=0).fit(X_train_std, y_train)
+    #y_pred = ppn.predict(X_test_std)
     
     #lr = lm.LogisticRegression(C=1000, random_state=0).fit(X_train_std, y_train)
     #y_pred = lr.predict(X_test_std)
+    
+    clf = svm.SVC(kernel="linear", C=1.0, random_state=0).fit(X_train_std, y_train)
+    y_pred = clf.predict(X_test_std)
     
     print('Misclassified samples: {}'.format((y_test != y_pred).sum()))
     print('Accuracy: {:10.2f}'.format(metrics.accuracy_score(y_test, y_pred)))
@@ -63,11 +67,33 @@ def main():
     y_combined = np.hstack((y_train, y_test))
     
     plt.figure()
-    plot_decision_regions(X=X_combined_std, y=y_combined, classifier=ppn, test_idx=range(105, 150))
+    #plot_decision_regions(X=X_combined_std, y=y_combined, classifier=ppn, test_idx=range(105, 150))
     #plot_decision_regions(X=X_combined_std, y=y_combined, classifier=lr, test_idx=range(105, 150))
+    plot_decision_regions(X=X_combined_std, y=y_combined, classifier=clf, test_idx=range(105, 150))
     plt.xlabel('petal length (standardized)')
     plt.ylabel('petal width (standardized)')
     plt.legend(loc=4)
+    plt.show()
+    
+    weights, params = [], []
+    
+    for c in np.arange(-5, 5):
+        #lr = lm.LogisticRegression(C=10**c, random_state=0)
+        #lr.fit(X_train_std, y_train)
+        #weights.append(lr.coef_[1])
+        clf = svm.SVC(kernel="linear", C=10**c, random_state=0)
+        clf.fit(X_train_std, y_train)
+        weights.append(clf.coef_[1])
+        params.append(10**c)
+    
+    weights = np.array(weights)
+    
+    plt.figure()
+    plt.plot(params, weights[:, 0], label='petal length')
+    plt.plot(params, weights[:, 1], label='petal width', linestyle="--")
+    plt.xlabel("C")
+    plt.ylabel("weight coefficient")
+    plt.xscale("log")
     plt.show()
 
 if __name__ == "__main__":
