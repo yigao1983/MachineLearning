@@ -27,11 +27,15 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
     plt.ylim(xx2.min(), xx2.max())
     
     # plot all samples
-    X_test, y_test = X[test_idx, :], y[test_idx, :]
-    
     for idx, cl in enumerate(np.unique(y)):
         plt.scatter(x=X[y==cl,0], y=X[y==cl,1], alpha=0.8, \
                     c=cmap(idx), marker=markers[idx], label=cl)
+    
+    # highlight test samples
+    if not test_idx is None:
+        X_test, y_test = X[test_idx,:], y[test_idx]
+        plt.scatter(x=X_test[:,0], y=X_test[:,1], alpha=1.0, \
+                    c="", linewidth=1, marker="o", s=55, label="test set")
     
 def main():
     
@@ -49,6 +53,9 @@ def main():
     ppn = lm.Perceptron(n_iter=40, eta0=0.01, random_state=0).fit(X_train_std, y_train)
     y_pred = ppn.predict(X_test_std)
     
+    #lr = lm.LogisticRegression(C=1000, random_state=0).fit(X_train_std, y_train)
+    #y_pred = lr.predict(X_test_std)
+    
     print('Misclassified samples: {}'.format((y_test != y_pred).sum()))
     print('Accuracy: {:10.2f}'.format(metrics.accuracy_score(y_test, y_pred)))
     
@@ -56,9 +63,11 @@ def main():
     y_combined = np.hstack((y_train, y_test))
     
     plt.figure()
-    plot_decision_regions(X_test_std, y_test, ppn)
+    plot_decision_regions(X=X_combined_std, y=y_combined, classifier=ppn, test_idx=range(105, 150))
+    #plot_decision_regions(X=X_combined_std, y=y_combined, classifier=lr, test_idx=range(105, 150))
     plt.xlabel('petal length (standardized)')
     plt.ylabel('petal width (standardized)')
+    plt.legend(loc=4)
     plt.show()
 
 if __name__ == "__main__":
