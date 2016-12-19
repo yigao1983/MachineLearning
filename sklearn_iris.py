@@ -3,6 +3,9 @@ import sklearn.model_selection as ms
 import sklearn.preprocessing as pp
 import sklearn.linear_model as lm
 import sklearn.svm as svm
+import sklearn.tree as tree
+import sklearn.ensemble as ensemble
+import sklearn.neighbors as neighbors
 import sklearn.metrics as metrics
 import numpy as np
 import matplotlib.colors as clrs
@@ -51,13 +54,15 @@ def main():
     X_train_std = sc.transform(X_train)
     X_test_std = sc.transform(X_test)
     
-    #ppn = lm.Perceptron(n_iter=40, eta0=0.01, random_state=0).fit(X_train_std, y_train)
-    #y_pred = ppn.predict(X_test_std)
-    
-    #lr = lm.LogisticRegression(C=1000, random_state=0).fit(X_train_std, y_train)
-    #y_pred = lr.predict(X_test_std)
-    
-    clf = svm.SVC(kernel="linear", C=1.0, random_state=0).fit(X_train_std, y_train)
+    #clf = lm.Perceptron(n_iter=40, eta0=0.01, random_state=0).fit(X_train_std, y_train)
+    #clf = lm.LogisticRegression(C=1000, random_state=0).fit(X_train_std, y_train)
+    #clf = svm.SVC(kernel="rbf", gamma=0.2, C=1.0, random_state=0).fit(X_train_std, y_train)
+    #clf = tree.DecisionTreeClassifier(criterion="entropy", max_depth=3, random_state=0).fit(X_train_std, y_train)
+    #clf = ensemble.RandomForestClassifier(criterion="entropy", n_estimators=100, random_state=1, n_jobs=2).\
+    #      fit(X_train_std, y_train)
+    #clf = ensemble.AdaBoostClassifier(n_estimators=5, random_state=0, learning_rate=0.1).\
+    #      fit(X_train_std, y_train)
+    clf = neighbors.KNeighborsClassifier(n_neighbors=5, p=2, metric="minkowski").fit(X_train_std, y_train)
     y_pred = clf.predict(X_test_std)
     
     print('Misclassified samples: {}'.format((y_test != y_pred).sum()))
@@ -67,14 +72,15 @@ def main():
     y_combined = np.hstack((y_train, y_test))
     
     plt.figure()
-    #plot_decision_regions(X=X_combined_std, y=y_combined, classifier=ppn, test_idx=range(105, 150))
-    #plot_decision_regions(X=X_combined_std, y=y_combined, classifier=lr, test_idx=range(105, 150))
     plot_decision_regions(X=X_combined_std, y=y_combined, classifier=clf, test_idx=range(105, 150))
     plt.xlabel('petal length (standardized)')
     plt.ylabel('petal width (standardized)')
     plt.legend(loc=4)
     plt.show()
     
+    #tree.export_graphviz(clf, out_file='tree.dot', feature_names=['petal length', 'petal width'])
+    
+    """
     weights, params = [], []
     
     for c in np.arange(-5, 5):
@@ -95,7 +101,7 @@ def main():
     plt.ylabel("weight coefficient")
     plt.xscale("log")
     plt.show()
-
+    """
 if __name__ == "__main__":
     
     main()
