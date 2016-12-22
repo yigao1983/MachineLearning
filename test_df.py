@@ -11,7 +11,8 @@ def main():
     0.1,11.0,12.0,'''
     
     df = pd.read_csv(io.StringIO(csv_data))
-    
+    print(df)
+    """
     imr = pp.Imputer(missing_values="NaN", strategy="mean", axis=0).fit(df.values)
     
     imputed_data = imr.transform(df.values)
@@ -36,7 +37,7 @@ def main():
     
     print(X)
     print(y)
-    
+    """
 if __name__ == "__main__":
     
     main()
