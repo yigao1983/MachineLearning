@@ -3,6 +3,7 @@ import pandas as pd
 import sklearn.linear_model as lm
 import sklearn.preprocessing as pp
 import sklearn.decomposition as dc
+import sklearn.discriminant_analysis as da
 import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import matplotlib.colors as clrs
@@ -54,13 +55,14 @@ def main():
     stdsc = pp.StandardScaler()
     X_train_std = stdsc.fit_transform(X_train)
     X_test_std = stdsc.transform(X_test)
-    
+    """
+    # PCA
     pca = dc.PCA(n_components=2)
     lr = lm.LogisticRegression()
     
     X_train_pca = pca.fit_transform(X_train_std)
     X_test_pca = pca.transform(X_test_std)
-    """
+    
     colors = ['r', 'b', 'g']
     markers = ['s', 'x', 'o']
     plt.figure()
@@ -70,13 +72,11 @@ def main():
     plt.ylabel("PC 2")
     plt.legend("best")
     plt.show()
-    """
+    
     lr.fit(X_train_pca, y_train)
-    
     plot_decision_regions(X_train_pca, y_train, classifier=lr)
-    
     plot_decision_regions(X_test_pca, y_test, classifier=lr)
-    """
+    
     plt.figure()
     plt.bar(range(1, 14), var_exp, alpha=0.5, align="center", label="individual explained variance")
     plt.step(range(1, 14), cum_var_exp, where="mid", label="cumulative explained variance")
@@ -84,20 +84,16 @@ def main():
     plt.ylabel("Explained variance ratio")
     plt.legend(loc="best")
     plt.show()
-    
-    eigen_pairs = [(np.abs(eigen_vals[i]), eigen_vecs[:,i]) for i in range(len(eigen_vals))]
-    eigen_pairs.sort(reverse=True)
-    
-    w = np.vstack((eigen_pairs[0][1], eigen_pairs[1][1])).T
-    
-    X_train_pca = X_train_std.dot(w)
-    
-    colors = ['r', 'b', 'g']
-    markers = ['s', 'x', 'o']
-    
     """
+    # LDA
+    lda = da.LinearDiscriminantAnalysis(n_components=2)
+    X_train_lda = lda.fit_transform(X_train_std, y_train)
+    X_test_lda = lda.transform(X_test_std)
     
+    lr = lm.LogisticRegression().fit(X_train_lda, y_train)
+    plot_decision_regions(X_train_lda, y_train, classifier=lr)
     """
+    # KNN classifier
     knn = nb.KNeighborsClassifier(n_neighbors=2)
     sbs = SBS.SBS(estimator=knn, k_features=1).fit(X_train_std, y_train)
     
